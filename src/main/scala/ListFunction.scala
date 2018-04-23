@@ -1,4 +1,3 @@
-import scala.annotation.tailrec
 import scala.util.Random
 
 class ListFunction {
@@ -83,6 +82,15 @@ class ListFunction {
     ls.filter(x => (ls.indexOf(x) + 1) % n !=0)
   }
 
+  def dropV2[A](n: Int, ls: List[A]): List[A] = {
+    val (tuple1, tuple2) = ls.splitAt(n - 1)
+
+    tuple2 match {
+      case Nil => ls
+      case _ :: tail => tuple1 ::: dropV2(n, tail)
+    }
+  }
+
   def split[A](n: Int, ls: List[A]): (List[A],(List[A])) = {
     ls.splitAt(n)
   }
@@ -150,9 +158,34 @@ class ListFunction {
       h :: randomPermute(newList)
     }
   }
+
+  def combinations[A](len: Int, ls: List[A]): List[List[A]] = {
+    ls.combinations(len).toList
+  }
+
+  def group3[A](ls: List[A]): List[List[List[A]]] = {
+    for {
+      twos <- ls.combinations(2).toList
+      notTwos = ls.diff(twos)
+      threes <- notTwos.combinations(3).toList
+    } yield List(twos, threes, notTwos.diff(threes))
+  }
+
+  def group[A](nums: List[Int], ls: List[A]): List[List[List[A]]] = nums match {
+    case Nil => List(Nil)
+    case head :: tail =>
+      ls.combinations(head).toList
+        .flatMap(group1 => group(tail, ls.diff(group1)).map(group1 :: _))
+  }
+
+  def lsort[A](ls: List[List[A]]):    List[List[A]] = {
+    ls.sortWith(_.length < _.length)
+  }
+
+  def lsortFreq[A](ls: List[List[A]]): List[List[A]] = {
+    val freqs = Map(encodeDirect(ls.map(_.length).sortWith(_ < _)).map(_.swap):_*)
+    ls.sortWith((e1, e2) => freqs(e1.length) < freqs(e2.length))
+  }
+
 }
 
-object Tester extends App {
-  val l = new ListFunction
-  println(l.randomPermute(List('a, 'b, 'c, 'd, 'e, 'f)))
-}
